@@ -57,6 +57,8 @@ uniform float uBlur;
 
 uniform float uExtinction;
 uniform float uMinorant;
+uniform float uBoundary;
+uniform float uAbsorptionBoundary;
 uniform float uAnisotropy;
 uniform uint uMaxBounces;
 uniform uint uSteps;
@@ -131,7 +133,7 @@ void main() {
 
     // control component coefficients
     float controlExtinctionCoefficient = uMinorant * uExtinction; // control extinction is fraction of actual extinction
-    float controlAbsorptionCoefficient = uAbsorptionRatio * controlExtinctionCoefficient;
+    float controlAbsorptionCoefficient = uAbsorptionBoundary * controlExtinctionCoefficient;
     float controlScatteringCoefficient = controlExtinctionCoefficient - controlAbsorptionCoefficient;
 
     uint state = hash(uvec3(floatBitsToUint(mappedPosition.x), floatBitsToUint(mappedPosition.y), floatBitsToUint(uRandSeed)));
@@ -139,15 +141,16 @@ void main() {
     int lookups = 0; 
 
     for (uint i = 0u; i < uSteps; i++) {
-        float dist = random_exponential(state, uExtinction);; 
+        float uMajorant = uBoundary * uExtinction;
+        float dist = random_exponential(state, uMajorant);; 
         photon.position += dist * photon.direction;
 
         float F = 0.0;
 
         // control probabilities
-        float PControl = controlExtinctionCoefficient / uExtinction;
-        float PControlAbsorption = controlAbsorptionCoefficient / uExtinction;
-        float PControlScattering = controlScatteringCoefficient / uExtinction;
+        float PControl = controlExtinctionCoefficient / uMajorant;
+        float PControlAbsorption = controlAbsorptionCoefficient / uMajorant;
+        float PControlScattering = controlScatteringCoefficient / uMajorant;
 
         float random = random_uniform(state);        
 
@@ -169,7 +172,7 @@ void main() {
             
             resetPhoton(state, photon);
 
-            w = controlAbsorptionCoefficient / (PControlAbsorption * uExtinction);
+            w = controlAbsorptionCoefficient / (PControlAbsorption * uMajorant);
             photon.transmittance.r *= w;
             photon.transmittance.g *= w;
             photon.transmittance.b *= w;
@@ -183,7 +186,7 @@ void main() {
             photon.direction = sampleHenyeyGreenstein(state, uAnisotropy, photon.direction);
             photon.bounces++;
             
-            w = controlScatteringCoefficient / (PControlScattering * uExtinction);
+            w = controlScatteringCoefficient / (PControlScattering * uMajorant);
             photon.transmittance.r *= w;
             photon.transmittance.g *= w;
             photon.transmittance.b *= w;
@@ -193,7 +196,7 @@ void main() {
         vec4 volumeSample = sampleVolumeColor(photon.position);
         float scatteringCoefficient = max3(volumeSample.rgb) * uExtinction * volumeSample.a;
         float absorptionCoefficient = (1.0 - max3(volumeSample.rgb)) * uExtinction * volumeSample.a;
-        float nullCoefficient = (1.0 - volumeSample.a) * uExtinction; // enable negative here
+        float nullCoefficient = (uBoundary - volumeSample.a) * uExtinction; // enable negative here
 
         // residual coefficients
         float residualAbsorptionCoefficient = absorptionCoefficient - controlAbsorptionCoefficient;
@@ -215,7 +218,7 @@ void main() {
             
             resetPhoton(state, photon);
 
-            w = residualAbsorptionCoefficient / (PResidualAbsorption * uExtinction);
+            w = residualAbsorptionCoefficient / (PResidualAbsorption * uMajorant);
             photon.transmittance.r *= w;
             photon.transmittance.g *= w;
             photon.transmittance.b *= w;
@@ -231,13 +234,13 @@ void main() {
             photon.direction = sampleHenyeyGreenstein(state, uAnisotropy, photon.direction);
             photon.bounces++;
             
-            w = residualScatteringCoefficient / (PResidualScattering * uExtinction);
+            w = residualScatteringCoefficient / (PResidualScattering * uMajorant);
             photon.transmittance.r *= w;
             photon.transmittance.g *= w;
             photon.transmittance.b *= w;
         } else {
             // null collision
-            w = nullCoefficient / (PNull * uExtinction);
+            w = nullCoefficient / (PNull * uMajorant);
             photon.transmittance.r *= w;
             photon.transmittance.g *= w;
             photon.transmittance.b *= w;

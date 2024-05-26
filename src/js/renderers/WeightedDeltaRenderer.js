@@ -29,7 +29,6 @@ constructor(gl, volume, camera, environmentTexture, options = {}) {
             type: 'spinner',
             value: 1,
             min: 0,
-            max: 1
         },
         {
             name: 'anisotropy',

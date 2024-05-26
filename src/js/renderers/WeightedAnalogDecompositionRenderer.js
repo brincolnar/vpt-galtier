@@ -27,13 +27,20 @@ constructor(gl, volume, camera, environmentTexture, options = {}) {
             name: 'minorant',
             label: 'Minorant',
             type: 'spinner',
-            value: 0.1,
+            value: 0.01,
             min: 0,
             max: 1
         },
         {
-            name: 'controlAbsorption',
-            label: 'Control Absorption',
+            name: 'boundary',
+            label: 'Boundary',
+            type: 'spinner',
+            value: 1,
+            min: 0
+        },
+        {
+            name: 'absorptionBoundary',
+            label: 'Control absorption',
             type: 'spinner',
             value: 0.5,
             min: 0,
@@ -82,7 +89,9 @@ constructor(gl, volume, camera, environmentTexture, options = {}) {
             'bounces',
             'transferFunction',
             'controlAbsorption',
-            'minorant'
+            'minorant',
+            'boundary',
+            'absorptionBoundary'
         ].includes(name)) {
             this.reset();
         }
@@ -176,7 +185,8 @@ _integrateFrame() {
 
     gl.uniform1f(uniforms.uExtinction, this.extinction);
     gl.uniform1f(uniforms.uMinorant, this.minorant);
-    gl.uniform1f(uniforms.uControlAbsorption, this.controlAbsorption);
+    gl.uniform1f(uniforms.uBoundary, this.boundary);
+    gl.uniform1f(uniforms.uAbsorptionBoundary, this.absorptionBoundary);
     gl.uniform1f(uniforms.uAnisotropy, this.anisotropy);
     gl.uniform1ui(uniforms.uMaxBounces, this.bounces);
     gl.uniform1ui(uniforms.uSteps, this.steps);
