@@ -1,0 +1,53 @@
+1s
+python .\evaluation.py
+RMSE (RGB): 8.67379565348478
+Normalized RMSE (RGB): 0.034014884915626584
+
+2s
+PS C:\Users\BrinC\Desktop\faks\nrg\vpt-galtier\evaluation> python .\evaluation.py
+RMSE (RGB): 8.22518873684204
+Normalized RMSE (RGB): 0.032255642105262904
+
+3s
+python .\evaluation.py
+RMSE (RGB): 7.94262481812309
+Normalized RMSE (RGB): 0.03114754830636506
+
+4s
+python .\evaluation.py
+RMSE (RGB): 7.751720032503816
+Normalized RMSE (RGB): 0.03039890208825026
+
+5s
+python .\evaluation.py
+RMSE (RGB): 7.58122637756307
+Normalized RMSE (RGB): 0.029730299519855174
+
+6s
+python .\evaluation.py
+RMSE (RGB): 7.465326735067384
+Normalized RMSE (RGB): 0.029275791117911308
+
+7s
+python .\evaluation.py
+RMSE (RGB): 7.368599479589641
+Normalized RMSE (RGB): 0.028896468547410355
+
+8s
+python .\evaluation.py
+RMSE (RGB): 7.283377624423604
+Normalized RMSE (RGB): 0.02856226519381805
+
+9s
+python .\evaluation.py
+RMSE (RGB): 7.212119576279368
+Normalized RMSE (RGB): 0.028282821867762226
+
+10s
+python .\evaluation.py
+RMSE (RGB): 7.146678937550349
+Normalized RMSE (RGB): 0.028026191911962154
+
+5min
+python .\evaluation.py
+RMSE (RGB): 6.364327266888354

@@ -1,0 +1,43 @@
+1s
+python .\evaluation.py
+RMSE (RGB): 8.921530659583917
+
+2s
+python .\evaluation.py
+RMSE (RGB): 8.674059673432142
+
+3s
+python .\evaluation.py
+RMSE (RGB): 8.528812866128334
+
+4s
+python .\evaluation.py
+RMSE (RGB): 8.430513555375677
+
+5s
+python .\evaluation.py
+RMSE (RGB): 8.378962248501685
+
+6s
+python .\evaluation.py
+RMSE (RGB): 8.325335084817635
+
+7s
+python .\evaluation.py
+RMSE (RGB): 8.281243550999847
+
+8s
+python .\evaluation.py
+RMSE (RGB): 8.24774647770221
+
+9s
+python .\evaluation.py
+RMSE (RGB): 8.222247057811355
+
+10s
+python .\evaluation.py
+RMSE (RGB): 8.40034551666762
+
+5min
+python .\evaluation.py
+RMSE (RGB): 7.966363527071746

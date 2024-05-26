@@ -1,4 +1,4 @@
-// #part /glsl/shaders/renderers/WD/integrate/vertex
+// #part /glsl/shaders/renderers/WDT/integrate/vertex
 
 #version 300 es
 
@@ -16,7 +16,7 @@ void main() {
     gl_Position = vec4(position, 0, 1);
 }
 
-// #part /glsl/shaders/renderers/WD/integrate/fragment
+// #part /glsl/shaders/renderers/WDT/integrate/fragment
 
 #version 300 es
 precision mediump float;
@@ -55,9 +55,8 @@ uniform vec2 uInverseResolution;
 uniform float uRandSeed;
 uniform float uBlur;
 
-uniform float uMajorantExtinction;
 uniform float uExtinction;
-uniform float uSigmaS;
+uniform float uBoundary;
 uniform float uAnisotropy;
 uniform uint uMaxBounces;
 uniform uint uSteps;
@@ -127,43 +126,87 @@ void main() {
     photon.radiance = radianceAndSamples.rgb;
     photon.samples = uint(radianceAndSamples.w + 0.5);
 
+    // beginning with full transmittance
+    float w = 1.0;
+
+    float lookups = 0.0;
+
     uint state = hash(uvec3(floatBitsToUint(mappedPosition.x), floatBitsToUint(mappedPosition.y), floatBitsToUint(uRandSeed)));
     for (uint i = 0u; i < uSteps; i++) {
 
-        // rate is majorant
-        float dist = random_exponential(state, uMajorantExtinction);
+        float uMajorant = uBoundary * uExtinction;
+        float dist = random_exponential(state, uMajorant);
         photon.position += dist * photon.direction;
 
         vec4 volumeSample = sampleVolumeColor(photon.position);
+        lookups += 1.0;
 
-        float sigma_a = uExtinction - uSigmaS;
-        float PScattering = (uSigmaS / uMajorantExtinction);
-        float PAbsorption = (sigma_a / uMajorantExtinction);
-        float PNullCollision = 1.0 - (uExtinction / uMajorantExtinction);
+        // coefficients
+        float nullCollisionCoefficient = (uBoundary - volumeSample.a) * uExtinction; 
+        float absNullCollisionCoefficient = abs(nullCollisionCoefficient);
+        float scatteringCoefficient = max3(volumeSample.rgb) * uExtinction * volumeSample.a;
+        float absorptionCoefficient = (1.0 - max3(volumeSample.rgb)) * uExtinction * volumeSample.a;
+
+        // probabilities
+        float PNull =  absNullCollisionCoefficient / (volumeSample.a * uExtinction + absNullCollisionCoefficient);
+        float PScattering;
+        if (photon.bounces >= uMaxBounces) {
+            PScattering = 0.0;
+        } else {
+            PScattering = scatteringCoefficient / (volumeSample.a * uExtinction + absNullCollisionCoefficient);
+        }
+        float PAbsorption = 1.0 - PNull - PScattering;
+        // float PAbsorption = absorptionCoefficient / (volumeSample.a * uExtinction + absNullCollisionCoefficient);
+
 
         float fortuneWheel = random_uniform(state);
+        if (any(greaterThan(photon.position, vec3(1))) || any(lessThan(photon.position, vec3(0)))) {
+            // out of bounds
+            vec4 envSample = sampleEnvironmentMap(photon.direction);
+            vec3 radiance = photon.transmittance * envSample.rgb;
+            photon.samples++;
+            photon.radiance += (radiance - photon.radiance) / float(photon.samples);
+            resetPhoton(state, photon);
+        } else if (fortuneWheel < PAbsorption) {
+            // absorption
+            vec3 radiance = vec3(0);
+            photon.samples++;
+            photon.radiance += (radiance - photon.radiance) / float(photon.samples);
+            
+            resetPhoton(state, photon);
 
-        if(fortuneWheel < PNullCollision) {
-            photon.weight *= PNullCollision;
+            w = (absorptionCoefficient) / (PAbsorption * uMajorant);
+            photon.transmittance.r *= w;
+            photon.transmittance.g *= w;
+            photon.transmittance.b *= w;
+
+        } else if (fortuneWheel < PAbsorption + PScattering) {
+            // scattering
+            photon.transmittance *= volumeSample.rgb;
+            photon.direction = sampleHenyeyGreenstein(state, uAnisotropy, photon.direction);
+            photon.bounces++;
+            
+            w = (scatteringCoefficient) / (PScattering * uMajorant);
+            photon.transmittance.r *= w;
+            photon.transmittance.g *= w;
+            photon.transmittance.b *= w;
         } else {
-            photon.weight *= (1.0 - PNullCollision);
-            if(fortuneWheel < PAbsorption + PNullCollision) {
-                photon.weight = 0; // Photon absorbed
-            } else {
-                photon.direction = sampleHenyeyGreenstein(state, uAnisotropy, photon.direction);
-                photon.transmittance *= vec3(PScattering);
-                photon.bounces++;
-            }
+            // null collision
+            w = (nullCollisionCoefficient) / (PNull * uMajorant);
+            photon.transmittance.r *= w;
+            photon.transmittance.g *= w;
+            photon.transmittance.b *= w;
         }
     }
 
     oPosition = vec4(photon.position, 0);
     oDirection = vec4(photon.direction, float(photon.bounces));
     oTransmittance = vec4(photon.transmittance, 0);
+    // photon.radiance = vec3(float(lookups) / float(photon.samples), float(lookups) / float(photon.samples), float(lookups) / float(photon.samples));
     oRadiance = vec4(photon.radiance, float(photon.samples));
 }
 
-// #part /glsl/shaders/renderers/WD/render/vertex
+// #part /glsl/shaders/renderers/WDT/render/vertex
 
 #version 300 es
 
@@ -181,7 +224,7 @@ void main() {
     gl_Position = vec4(position, 0, 1);
 }
 
-// #part /glsl/shaders/renderers/WD/render/fragment
+// #part /glsl/shaders/renderers/WDT/render/fragment
 
 #version 300 es
 precision mediump float;
@@ -197,7 +240,7 @@ void main() {
     oColor = vec4(texture(uColor, vPosition).rgb, 1);
 }
 
-// #part /glsl/shaders/renderers/WD/reset/vertex
+// #part /glsl/shaders/renderers/WDT/reset/vertex
 
 #version 300 es
 
@@ -215,7 +258,7 @@ void main() {
     gl_Position = vec4(position, 0, 1);
 }
 
-// #part /glsl/shaders/renderers/WD/reset/fragment
+// #part /glsl/shaders/renderers/WDT/reset/fragment
 
 #version 300 es
 precision mediump float;

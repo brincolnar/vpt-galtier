@@ -1,0 +1,49 @@
+1s
+python .\evaluation.py
+RMSE (RGB): 8.588816943517763
+Normalized RMSE (RGB): 0.033681635072618676
+
+2s
+python .\evaluation.py
+RMSE (RGB): 8.127663669696343
+Normalized RMSE (RGB): 0.03187319086155429
+
+3s
+python .\evaluation.py
+RMSE (RGB): 7.860065973343098
+Normalized RMSE (RGB): 0.030823788130757247
+
+4s
+python .\evaluation.py
+RMSE (RGB): 7.985884531833527
+Normalized RMSE (RGB): 0.03131719424248442
+
+5s
+python .\evaluation.py
+RMSE (RGB): 7.883922064037442
+Normalized RMSE (RGB): 0.030917341427597812
+
+6s
+python .\evaluation.py
+RMSE (RGB): 7.802480880190748
+Normalized RMSE (RGB): 0.03059796423604215
+
+7s
+python .\evaluation.py
+RMSE (RGB): 7.734577954644624
+Normalized RMSE (RGB): 0.030331678253508326
+
+8s
+python .\evaluation.py
+RMSE (RGB): 7.691979568525724
+Normalized RMSE (RGB): 0.03016462575892441
+
+9s
+python .\evaluation.py
+RMSE (RGB): 7.648003404486203
+Normalized RMSE (RGB): 0.029992170213671385
+
+5min
+python .\evaluation.py
+RMSE (RGB): 6.408827943734023
+Normalized RMSE (RGB): 0.02513265860287852

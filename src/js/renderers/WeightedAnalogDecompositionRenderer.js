@@ -10,7 +10,7 @@ const [ SHADERS, MIXINS ] = await Promise.all([
     'mixins.json',
 ].map(url => fetch(url).then(response => response.json())));
 
-export class WeightedDeltaRenderer extends AbstractRenderer {
+export class WeightedAnalogDecompositionRenderer extends AbstractRenderer {
 
 constructor(gl, volume, camera, environmentTexture, options = {}) {
     super(gl, volume, camera, environmentTexture, options);
@@ -24,10 +24,18 @@ constructor(gl, volume, camera, environmentTexture, options = {}) {
             min: 0,
         },
         {
-            name: 'boundary',
-            label: 'Boundary',
+            name: 'minorant',
+            label: 'Minorant',
             type: 'spinner',
-            value: 1,
+            value: 0.1,
+            min: 0,
+            max: 1
+        },
+        {
+            name: 'controlAbsorption',
+            label: 'Control Absorption',
+            type: 'spinner',
+            value: 0.5,
             min: 0,
             max: 1
         },
@@ -73,14 +81,14 @@ constructor(gl, volume, camera, environmentTexture, options = {}) {
             'anisotropy',
             'bounces',
             'transferFunction',
-            'boundary',
-            'rate'
+            'controlAbsorption',
+            'minorant'
         ].includes(name)) {
             this.reset();
         }
     });
 
-    this._programs = WebGL.buildPrograms(gl, SHADERS.renderers.WDT, MIXINS);
+    this._programs = WebGL.buildPrograms(gl, SHADERS.renderers.AD, MIXINS);
 }
 
 destroy() {
@@ -165,9 +173,10 @@ _integrateFrame() {
     gl.uniform2f(uniforms.uInverseResolution, 1 / this._resolution, 1 / this._resolution);
     gl.uniform1f(uniforms.uRandSeed, Math.random());
     gl.uniform1f(uniforms.uBlur, 0);
-    gl.uniform1f(uniforms.uExtinction, this.extinction);
-    gl.uniform1f(uniforms.uBoundary, this.boundary);
 
+    gl.uniform1f(uniforms.uExtinction, this.extinction);
+    gl.uniform1f(uniforms.uMinorant, this.minorant);
+    gl.uniform1f(uniforms.uControlAbsorption, this.controlAbsorption);
     gl.uniform1f(uniforms.uAnisotropy, this.anisotropy);
     gl.uniform1ui(uniforms.uMaxBounces, this.bounces);
     gl.uniform1ui(uniforms.uSteps, this.steps);
