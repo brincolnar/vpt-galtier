@@ -43,6 +43,10 @@ python .\evaluation.py
 RMSE (RGB): 7.648003404486203
 Normalized RMSE (RGB): 0.029992170213671385
 
+10s
+python .\evaluation.py
+RMSE (RGB): 7.843778612710304
+
 5min
 python .\evaluation.py
 RMSE (RGB): 6.408827943734023
